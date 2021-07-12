@@ -13,7 +13,7 @@ import {
   setTempoMidiEvent,
   timeSignatureMidiEvent,
   trackNameMidiEvent,
-  volumeMidiEvent,
+  volumeMidiEvent
 } from "../midi/MidiEvent"
 import Track from "./Track"
 
@@ -26,6 +26,32 @@ export function conductorTrack(name = "") {
     endOfTrackMidiEvent(0),
   ])
   track.addEvents(events)
+  return track
+}
+
+export function segmentTrack(name = "Segmentation") {
+  const track = new Track()
+  const events = toTrackEvents([
+    trackNameMidiEvent(0, name),
+    timeSignatureMidiEvent(0),
+    setTempoMidiEvent(0, 60000000 / 120),
+    endOfTrackMidiEvent(0),
+  ])
+  track.addEvents(events)
+  track.special_track = "segment"
+  return track
+}
+
+export function chordTrack(name = "Chord") {
+  const track = new Track()
+  const events = toTrackEvents([
+    trackNameMidiEvent(0, name),
+    timeSignatureMidiEvent(0),
+    setTempoMidiEvent(0, 60000000 / 120),
+    endOfTrackMidiEvent(0),
+  ])
+  track.addEvents(events)
+  track.special_track = "segment"
   return track
 }
 

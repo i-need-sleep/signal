@@ -33,7 +33,6 @@ export const TrackListMenuButton: FC = observer(() => {
       <NavBackButton ref={ref} onClick={onClickNavBack}>
         <ArrowDropDown />
       </NavBackButton>
-
       <Menu
         keepMounted
         open={open}

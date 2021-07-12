@@ -6,7 +6,7 @@ import {
   ControllerEvent,
   ProgramChangeEvent,
   SetTempoEvent,
-  TrackNameEvent,
+  TrackNameEvent
 } from "midifile-ts"
 import { action, computed, makeObservable, observable, transaction } from "mobx"
 import { createModelSchema, list, primitive } from "serializr"
@@ -25,7 +25,7 @@ import {
   getTimeSignatureEvent,
   getTrackNameEvent,
   getVolume,
-  isTickBefore,
+  isTickBefore
 } from "./selector"
 import { TrackEvent, TrackEventOf } from "./TrackEvent"
 
@@ -33,6 +33,7 @@ export default class Track {
   events: TrackEvent[] = []
   lastEventId = 0
   channel: number | undefined = undefined
+  special_track: string | undefined = undefined
 
   getEventById = (id: number) => this.events.find((e) => e.id === id)
 
@@ -56,6 +57,7 @@ export default class Track {
       events: observable.deep,
       lastEventId: observable,
       channel: observable,
+      special_track: observable
     })
   }
 

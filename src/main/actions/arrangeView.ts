@@ -2,7 +2,7 @@ import mapValues from "lodash/mapValues"
 import {
   fromPoints as rectFromPoints,
   IPoint,
-  IRect,
+  IRect
 } from "../../common/geometry"
 import { isNotUndefined } from "../../common/helpers/array"
 import Quantizer from "../../common/quantizer"
@@ -107,10 +107,19 @@ export const arrangeMoveSelection = (rootStore: RootStore) => (pos: IPoint) => {
     return
   }
 
+
+  if (selection.y == 2){
+    selection.y = 3
+  }
+  if (selection.y == 1){
+    selection.y = 0
+  }
+
   const dt = selection.x - s.selection.x
   const di = selection.y - s.selection.y
+  
   s.selection = selection
-
+  
   if (dt === 0 && di === 0) {
     return
   }
@@ -149,6 +158,9 @@ export const arrangeMoveSelection = (rootStore: RootStore) => (pos: IPoint) => {
   if (di !== 0) {
     const ids: { [key: number]: number[] } = {}
     for (const u of updates) {
+      if (u.destinationTrackId < 0){
+        return
+      }
       tracks[u.sourceTrackId].removeEvents(u.events.map((e) => e.id))
       const events = tracks[u.destinationTrackId].addEvents(u.events)
       ids[u.destinationTrackId] = events.map((e) => e.id)

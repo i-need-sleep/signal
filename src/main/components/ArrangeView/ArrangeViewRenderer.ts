@@ -16,6 +16,9 @@ export class ArrangeViewRenderer {
   private highlightedBeatObject: SolidRectangleObject
   private lineObject: SolidRectangleObject
   private selectionObject: BorderedRectangleObject
+  private selectionObject_con: BorderedRectangleObject
+  private blockObject: BorderedRectangleObject
+  private chordBlockObject: BorderedRectangleObject
 
   theme: Theme = defaultTheme
 
@@ -28,6 +31,9 @@ export class ArrangeViewRenderer {
     this.highlightedBeatObject = new SolidRectangleObject(gl)
     this.lineObject = new SolidRectangleObject(gl)
     this.selectionObject = new BorderedRectangleObject(gl)
+    this.selectionObject_con = new BorderedRectangleObject(gl)
+    this.blockObject = new BorderedRectangleObject(gl)
+    this.chordBlockObject = new BorderedRectangleObject(gl)
 
     const objects = [
       this.lineObject,
@@ -35,6 +41,9 @@ export class ArrangeViewRenderer {
       this.highlightedBeatObject,
       this.noteObject,
       this.selectionObject,
+      this.selectionObject_con,
+      this.blockObject,
+      this.chordBlockObject,
       this.cursorObject,
     ]
 
@@ -59,6 +68,9 @@ export class ArrangeViewRenderer {
     cursorX: number,
     notes: IRect[],
     selection: IRect,
+    selection_con: IRect,
+    segmentBlockRects: IRect[],
+    chordBlockRects: IRect[],
     beats: number[],
     highlightedBeats: number[],
     lines: number[],
@@ -66,6 +78,9 @@ export class ArrangeViewRenderer {
   ) {
     this.noteObject.updateBuffer(notes)
     this.selectionObject.updateBuffer([selection])
+    this.selectionObject_con.updateBuffer([selection_con])
+    this.blockObject.updateBuffer(segmentBlockRects)
+    this.chordBlockObject.updateBuffer(chordBlockRects)
     this.cursorObject.updateBuffer([this.vline(cursorX)])
     this.beatObject.updateBuffer(beats.map(this.vline))
     this.highlightedBeatObject.updateBuffer(highlightedBeats.map(this.vline))
@@ -117,6 +132,24 @@ export class ArrangeViewRenderer {
       projectionMatrix: projectionMatrixScrollXY,
       strokeColor: colorToVec4(Color(this.theme.themeColor)),
       fillColor: vec4.create(),
+    })
+
+    this.selectionObject_con.updateUniforms({
+      projectionMatrix: projectionMatrixScrollXY,
+      strokeColor: colorToVec4(Color("hsla(122, 100%, 46%, 1)")),
+      fillColor: colorToVec4(Color("hsla(122, 100%, 46%, 0.15)")),
+    })
+
+    this.blockObject.updateUniforms({
+      projectionMatrix: projectionMatrixScrollXY,
+      strokeColor: colorToVec4(Color(this.theme.themeColor)),
+      fillColor: colorToVec4(Color("hsla(269, 68%, 43%, 0.9)")),
+    })
+
+    this.chordBlockObject.updateUniforms({
+      projectionMatrix: projectionMatrixScrollXY,
+      strokeColor: colorToVec4(Color(this.theme.themeColor)),
+      fillColor: colorToVec4(Color("hsla(239, 100%, 50%, 1)")),
     })
 
     this.cursorObject.updateUniforms({

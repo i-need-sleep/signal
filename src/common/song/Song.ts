@@ -37,6 +37,8 @@ export default class Song {
     if (t.channel === undefined && this.tracks.length > 0) {
       t.channel = t.channel || this.tracks.length - 1
     }
+    if (t.channel)
+      t.channel -= 2
     this.tracks.push(t)
   }
 

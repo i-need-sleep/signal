@@ -5,6 +5,8 @@ import { FC, useCallback } from "react"
 import styled from "styled-components"
 import { localized } from "../../../common/localize/localizedString"
 import { useStores } from "../../hooks/useStores"
+import { ConButton } from "../AIAssisted/Continuation/ConButton"
+import { TestButton } from "../AIAssisted/Continuation/TestButton"
 import QuantizeSelector from "../PianoRollToolbar/QuantizeSelector/QuantizeSelector"
 import { StyledToggleButton } from "../PianoRollToolbar/ToolSelector"
 
@@ -65,11 +67,14 @@ export const ArrangeToolbar: FC = observer(() => {
 
         <FlexibleSpacer />
 
+        <TestButton />
+        <ConButton />
+
         <QuantizeSelector
           value={quantize}
           onSelect={(value) => onSelectQuantize({ denominator: value })}
         />
-
+        
         <StyledToggleButton onClick={onClickAutoScroll} selected={autoScroll}>
           <KeyboardTab />
         </StyledToggleButton>

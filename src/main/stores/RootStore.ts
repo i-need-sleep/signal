@@ -9,6 +9,7 @@ import IFrameSynth from "../services/IFrameSynth"
 import { MIDIInput, previewMidiInput } from "../services/MIDIInput"
 import { MIDIRecorder } from "../services/MIDIRecorder"
 import ArrangeViewStore from "./ArrangeViewStore"
+import AssistStore from "./AssistStore"
 import HistoryStore from "./HistoryStore"
 import { MIDIDeviceStore } from "./MIDIDeviceStore"
 import PianoRollStore from "./PianoRollStore"
@@ -38,6 +39,7 @@ export default class RootStore {
   arrangeViewStore = new ArrangeViewStore(this)
   tempoEditorStore = new TempoEditorStore(this)
   midiDeviceStore = new MIDIDeviceStore()
+  assistStore = new AssistStore(this)
 
   services: Services
 

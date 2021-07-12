@@ -2,14 +2,14 @@ import {
   AnyEvent,
   read,
   StreamSource,
-  write as writeMidiFile,
+  write as writeMidiFile
 } from "midifile-ts"
 import { toJS } from "mobx"
 import { downloadBlob } from "../helpers/Downloader"
 import { toRawEvents } from "../helpers/toRawEvents"
 import { toTrackEvents } from "../helpers/toTrackEvents"
 import Song from "../song"
-import Track from "../track"
+import Track, { chordTrack, conductorTrack, segmentTrack } from "../track"
 
 const trackFromMidiEvents = (events: AnyEvent[]): Track => {
   const track = new Track()
@@ -27,10 +27,15 @@ const trackFromMidiEvents = (events: AnyEvent[]): Track => {
 
 export function songFromMidi(data: StreamSource) {
   const song = new Song()
+  song.addTrack(conductorTrack())
+  song.addTrack(segmentTrack())
+  song.addTrack(chordTrack())
+  
   const midi = read(data)
 
   midi.tracks.map(trackFromMidiEvents).map((track) => song.addTrack(track))
-  song.selectedTrackId = 1
+  song.selectedTrackId = 4
+  song.removeTrack(3)
   song.timebase = midi.header.ticksPerBeat
 
   return song

@@ -7,6 +7,7 @@ import { localized } from "../../../common/localize/localizedString"
 import { useStores } from "../../hooks/useStores"
 import Logo from "../../images/logo-circle.svg"
 import PianoIcon from "../../images/piano.svg"
+import { ConConfirm } from "../AIAssisted/Continuation/ConGen"
 import { FileMenuButton } from "./FileMenuButton"
 
 const BannerContainer = styled.div`
@@ -76,6 +77,7 @@ const Separator = styled.div`
 
 export const Navigation: FC = observer(() => {
   const { rootViewStore, router } = useStores()
+  const rootStore = useStores()
 
   return (
     <Container>
@@ -92,7 +94,12 @@ export const Navigation: FC = observer(() => {
       </Tab>
       <Tab
         className={router.path === "/arrange" ? "active" : undefined}
-        onClick={useCallback(() => (router.path = "/arrange"), [])}
+        onClick={useCallback(() => {
+          ConConfirm(rootStore);
+          rootStore.assistStore.active = "selection";
+          (
+          router.path = "/arrange"
+          )}, [])}
       >
         <List />
         <span>{localized("arrange", "Arrange")}</span>

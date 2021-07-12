@@ -9,7 +9,7 @@ import {
   removeTrack,
   selectTrack,
   toggleMuteTrack,
-  toggleSoloTrack,
+  toggleSoloTrack
 } from "../../actions"
 import { useStores } from "../../hooks/useStores"
 import { TrackListItem, TrackListItemData } from "./TrackListItem"
@@ -32,7 +32,7 @@ export const TrackList: FC = observer(() => {
     rootStore.trackMute.isSolo(i)
   )
   const tracks = rootStore.song.tracks
-    .filter((t) => !t.isConductorTrack)
+    .filter((t) => (!t.isConductorTrack && t.special_track == undefined))
     .map((t): TrackListItemData => {
       const index = rootStore.song.tracks.indexOf(t)
       const selected =

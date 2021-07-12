@@ -6,7 +6,7 @@ import {
   pitchBendMidiEvent,
   programChangeMidiEvent,
   setTempoMidiEvent,
-  volumeMidiEvent,
+  volumeMidiEvent
 } from "../../common/midi/MidiEvent"
 import { isNoteEvent, NoteEvent, TrackEventOf } from "../../common/track"
 import RootStore from "../stores/RootStore"
@@ -14,7 +14,7 @@ import { pushHistory } from "./history"
 import {
   moveSelectionBy,
   resizeNotesInSelectionLeftBy,
-  resizeNotesInSelectionRightBy,
+  resizeNotesInSelectionRightBy
 } from "./selection"
 
 export const changeTempo =
@@ -136,7 +136,7 @@ export const removeEvent = (rootStore: RootStore) => (eventId: number) => {
 /* note */
 
 export const createNote =
-  (rootStore: RootStore) => (tick: number, noteNumber: number) => {
+  (rootStore: RootStore) => (tick: number, noteNumber: number, duration = 0, mute = false) => {
     const {
       song,
       pianoRollStore,
@@ -152,20 +152,27 @@ export const createNote =
       ? quantizer.round(tick)
       : quantizer.floor(tick)
 
+    if (duration == 0){
+      duration = pianoRollStore.lastNoteDuration || quantizer.unit
+    }
+
     const note = <Omit<NoteEvent, "id">>{
       type: "channel",
       subtype: "note",
       noteNumber: noteNumber,
       tick,
       velocity: 127,
-      duration: pianoRollStore.lastNoteDuration || quantizer.unit,
+      duration: duration,
     }
     const added = selectedTrack.addEvent(note)
 
-    player.playNote({
-      ...note,
-      channel: selectedTrack.channel,
-    })
+    if (! mute){
+      player.playNote({
+        ...note,
+        channel: selectedTrack.channel,
+      })
+    }
+    
     return added.id
   }
 
