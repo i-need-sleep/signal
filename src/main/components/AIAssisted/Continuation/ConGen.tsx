@@ -1,6 +1,14 @@
 import * as mm from '@magenta/music/es6';
 import { createNote, removeEvent } from '../../../actions';
-import RootStore from '../../../stores/RootStore';
+import { makeNoteSeq } from '../makeNoteSeqFromSelection';
+import mapValues from "lodash/mapValues"
+import {
+  fromPoints as rectFromPoints,
+  IPoint,
+  IRect
+} from "../../../../common/geometry"
+import Track, { isNoteEvent, NoteEvent } from "../../../../common/track"
+import RootStore from "../../../stores/RootStore"
 
 
 const music_rnn = new mm.MusicRNN(
@@ -20,7 +28,7 @@ export const ConGenerate = (rootStore: RootStore) => {
   }
   rootStore.assistStore.temp_notes = []
 
-  // ... And nots in the generation selection
+  // ... And notes in the generation selection
   let track_events = rootStore.song.tracks[Number(Object.keys(rootStore.arrangeViewStore.selectedEventIds)[0])].events
   for (let i=0; i<track_events.length; i++){
     let track_event = track_events[i]
@@ -39,53 +47,11 @@ export const ConGenerate = (rootStore: RootStore) => {
     }
   }
 
-  // Fetch selected notes
+  let noteSeq = makeNoteSeq(rootStore, true)
+  const timebase = rootStore.song.timebase
   const selectedEventIdsObj = rootStore.arrangeViewStore.selectedEventIds
-  
-  if (Object.values(selectedEventIdsObj).length != 1){
-    return
-  }
 
-  const eventIds = Object.values(selectedEventIdsObj)[0]
-
-  if (eventIds.length == 0){
-    return
-  }
-
-  // Make a noteseq
-  let timebase = rootStore.song.timebase
-  let quantizedStepLength = Math.floor(timebase/quantPerQuarter)
-  let notes = []
-  let lastQuantStep = 0
-  let firstQuantStep = -1
-
-  for (let i=0; i<eventIds.length; i++){
-    rootStore.song.selectedTrackId = Number(Object.keys(selectedEventIdsObj)[0])
-    let noteEvent = rootStore.song.tracks[rootStore.song.selectedTrackId].getEventById(eventIds[i])
-    if (noteEvent && noteEvent.type == "channel" && noteEvent.subtype == "note"){
-      let start = Math.floor(noteEvent.tick/quantizedStepLength)
-      let end = Math.floor((noteEvent.tick + noteEvent.duration)/quantizedStepLength)
-      let pitch = noteEvent.noteNumber
-      if (start == end || pitch < 48 || pitch > 82){
-        continue
-      }
-      if (end > lastQuantStep){
-        lastQuantStep = end
-      }
-      if (firstQuantStep == -1){
-        firstQuantStep = start
-      }
-      notes.push({
-        quantizedStartStep: start - firstQuantStep,
-        quantizedEndStep: end - firstQuantStep,
-        pitch: pitch
-      })
-    }
-  }
-
-  let noteSeq = {notes: notes, quantizationInfo: {stepsPerQuarter: quantPerQuarter}, totalQuantizedSteps: lastQuantStep - firstQuantStep}
-
-  if (rootStore.arrangeViewStore.selection_con == null){
+  if (rootStore.arrangeViewStore.selection_con == null || noteSeq == null){
     return
   }
 
@@ -105,7 +71,6 @@ export const ConGenerate = (rootStore: RootStore) => {
 
   // Write generated notes
   function write_rnn_notes (notes: any){
-    let new_note_ids : Array<Number> = []
     for (let i=0; i < notes.length; i++){
       let pitch = notes[i].pitch
       if (rootStore.arrangeViewStore.selection_con == null){return}
@@ -120,8 +85,33 @@ export const ConGenerate = (rootStore: RootStore) => {
   
 }
 
+function getNotesInSelection(tracks: Track[], selection: IRect) {
+  const startTick = selection.x
+  const endTick = selection.x + selection.width
+  const ids: { [key: number]: number[] } = {}
+  for (
+    let trackIndex = selection.y;
+    trackIndex < selection.y + selection.height;
+    trackIndex++
+  ) {
+    const track = tracks[trackIndex]
+    const events = track.events
+      .filter(isNoteEvent)
+      .filter((e) => e.tick >= startTick && e.tick <= endTick)
+    ids[trackIndex] = events.map((e) => e.id)
+  }
+  return ids
+}
+
 export const ConConfirm = (rootStore: RootStore) => {
   rootStore.assistStore.temp_notes = []
+  if (rootStore.arrangeViewStore.selection_con == null ||  rootStore.arrangeViewStore.selection == null){return}
+  rootStore.arrangeViewStore.selection.width += rootStore.arrangeViewStore.selection_con.width
+  const {
+    song: { tracks }
+  } = rootStore
+
+    rootStore.arrangeViewStore.selectedEventIds = getNotesInSelection(tracks, rootStore.arrangeViewStore.selection)
   rootStore.arrangeViewStore.selection_con = null
   rootStore.assistStore.con.display_buttons = false
 }

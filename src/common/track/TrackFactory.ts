@@ -34,8 +34,6 @@ export function segmentTrack(name = "Segmentation") {
   const events = toTrackEvents([
     trackNameMidiEvent(0, name),
     timeSignatureMidiEvent(0),
-    setTempoMidiEvent(0, 60000000 / 120),
-    endOfTrackMidiEvent(0),
   ])
   track.addEvents(events)
   track.special_track = "segment"
@@ -47,11 +45,25 @@ export function chordTrack(name = "Chord") {
   const events = toTrackEvents([
     trackNameMidiEvent(0, name),
     timeSignatureMidiEvent(0),
-    setTempoMidiEvent(0, 60000000 / 120),
-    endOfTrackMidiEvent(0),
   ])
   track.addEvents(events)
-  track.special_track = "segment"
+  track.special_track = "chord"
+  return track
+}
+
+export function AccompanimentTrack(channel: number, name = "Accompaniment") {
+  if (!Number.isInteger(channel)) {
+    throw new Error("channel is not integer")
+  }
+  const track = new Track()
+  track.channel = channel
+  const events = toTrackEvents([
+    ...resetTrackMIDIEvents(channel),
+    endOfTrackMidiEvent(1),
+    trackNameMidiEvent(2, name),
+  ])
+  track.addEvents(events)
+  track.special_track = "accompaniment"
   return track
 }
 

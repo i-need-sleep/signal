@@ -16,7 +16,7 @@ export default class ArrangeViewStore {
   selection: IRect | null = null // Rect を使うが、x は tick, y はトラック番号を表す
   selection_con: IRect | null = null
   segmentBlocks: any[] = []
-  chordBlocks: any[] = []
+  chordBlocks: any[] = [] // [{x,y,width,height,color,chd_str,chd_mat=[root, inner, [outers], absolute_bass]}]
   selectedEventIds: { [key: number]: number[] } = {} // { trackId: [eventId] }
   autoScroll = true
   quantize = 0
@@ -110,8 +110,9 @@ export default class ArrangeViewStore {
   }
 
   get transform(): NoteCoordTransform {
-    return new NoteCoordTransform(Layout.pixelsPerTick * this.scaleX, 0.3, 127)
+    return new NoteCoordTransform(Layout.pixelsPerTick * this.scaleX, 0.3*2, 127)
   }
+
 
   get trackHeight(): number {
     const { transform } = this
@@ -136,7 +137,7 @@ export default class ArrangeViewStore {
           .filter(isNoteEvent)
           .map((e) => {
             const rect = transform.getRect(e)
-            return { ...rect, height: 1, y: trackHeight * i + rect.y }
+            return { ...rect, height: 1*2, y: trackHeight * i+ rect.y }
           })
       )
       .flat()

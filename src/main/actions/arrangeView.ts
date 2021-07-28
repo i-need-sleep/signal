@@ -65,6 +65,7 @@ export const arrangeResizeSelection =
     } = rootStore
     // 選択範囲作成時 (確定前) のドラッグ中
     // Drag during selection (before finalization)
+    end.x = Math.max(end.x, 0)
     s.selection = quantizeRect(quantizer, createRect(tracks, start, end))
   }
 
@@ -76,6 +77,7 @@ export const arrangeEndSelection =
       services: { quantizer },
     } = rootStore
 
+    end.x = Math.max(end.x, 0)
     const selection = quantizeRect(quantizer, createRect(tracks, start, end))
     if (selection) {
       s.selection = selection

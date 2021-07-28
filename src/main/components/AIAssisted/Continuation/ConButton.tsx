@@ -8,8 +8,10 @@ import { useCallback, useState } from "react"
 import styled from "styled-components"
 import { useStores } from "../../../hooks/useStores"
 import SelectIcon from "../../../images/select.svg"
+import { accGenerate } from "../Accompaniment/AccGen"
 import { ConConfirm, ConGenerate } from "./ConGen"
 import { ConTempSlider } from "./ConTempSlider"
+import { AccFilterSelect } from "../Accompaniment/AccFilterSelect"
 
 const useStyles = makeStyles((theme) => ({
   toggleButtonGroup: {
@@ -42,10 +44,15 @@ export const ConButton = observer(() => {
   const rootStore = useStores()
   const active = assistStore.active
 
-  const [anchorEl, setAnchorEl] = useState<Element | null>(null)
 
   const onClickCon = useCallback(
     () => (assistStore.active = "continuation"),
+    []
+  )
+  const onClickArr = useCallback(
+    () => {
+      // assistStore.active = "arrangement"
+    },
     []
   )
   const onClickPencil = useCallback(
@@ -57,10 +64,24 @@ export const ConButton = observer(() => {
     []
   )
 
+  // Continuation dropdown
+  const [anchorEl, setAnchorEl] = useState<Element | null>(null)
+
   const open = Boolean(anchorEl)
 
-  const handleClose = () => {
+  const handleClose = (e:any) => {
+    e.stopPropagation()
     setAnchorEl(null);
+  };
+
+  // Accompaniment dropdown
+  const [anchorEl_acc, setAnchorEl_acc] = useState<Element | null>(null)
+
+  const open_acc = Boolean(anchorEl_acc)
+
+  const handleClose_acc = (e:any) => {
+    e.stopPropagation()
+    setAnchorEl_acc(null);
   };
 
   const classes = useStyles()
@@ -93,6 +114,7 @@ export const ConButton = observer(() => {
         Continuation
         <ArrowDropDown 
         onClick={function(e) {
+          e.stopPropagation()
           setAnchorEl(e.currentTarget)
         }} />
         <Popover
@@ -107,11 +129,46 @@ export const ConButton = observer(() => {
           vertical: 'top',
           horizontal: 'center',
         }}
+        PaperProps={{
+          style: {
+          overflow: 'hidden'},
+        }}
       >
 
-        <Typography className={classes.typography}>Temperature</Typography>
+        <Typography className={classes.typography}>Temperature: 
+        {" "+rootStore.assistStore.con.rnn_temperature}</Typography>
         <ConTempSlider/>
 
+      </Popover>
+      </StyledToggleButton>
+      <StyledToggleButton onClick={() => {
+        onClickArr()
+        accGenerate(rootStore)
+      }} value="arrangement">
+        Accompaniment
+        <ArrowDropDown 
+        onClick={function(e) {
+          e.stopPropagation()
+          setAnchorEl_acc(e.currentTarget)
+        }} />
+        <Popover
+        open={open_acc}
+        anchorEl={anchorEl_acc}
+        onClose={handleClose_acc}
+        anchorOrigin={{
+          vertical: 'bottom',
+          horizontal: 'center',
+        }}
+        transformOrigin={{
+          vertical: 'top',
+          horizontal: 'center',
+        }}
+        PaperProps={{
+          style: {
+          overflow: 'hidden'},
+        }}
+      >
+      <AccFilterSelect set={setAnchorEl_acc} rootStore={rootStore}/>
       </Popover>
       </StyledToggleButton>
       <StyledToggleButton onClick={onClickPencil} value="pencil">
@@ -120,6 +177,7 @@ export const ConButton = observer(() => {
             width: "1rem",
           }}
         />
+        
       </StyledToggleButton>
       <StyledToggleButton onClick={function (e){
           onClickSelection()

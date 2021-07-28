@@ -136,13 +136,16 @@ export const removeEvent = (rootStore: RootStore) => (eventId: number) => {
 /* note */
 
 export const createNote =
-  (rootStore: RootStore) => (tick: number, noteNumber: number, duration = 0, mute = false) => {
+  (rootStore: RootStore) => (tick: number, noteNumber: number, duration = 0, mute = false, track_idx = -1) => {
     const {
       song,
       pianoRollStore,
       services: { player, quantizer },
     } = rootStore
-    const selectedTrack = song.selectedTrack
+    let selectedTrack = song.selectedTrack
+    if (track_idx > -1){
+      selectedTrack = rootStore.song.tracks[track_idx]
+    }
     if (selectedTrack === undefined || selectedTrack.channel == undefined) {
       return
     }

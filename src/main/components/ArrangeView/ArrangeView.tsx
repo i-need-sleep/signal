@@ -1,4 +1,5 @@
 import { Popover, TextField } from "@material-ui/core"
+import { LocalConvenienceStoreOutlined } from "@material-ui/icons"
 import useComponentSize from "@rehooks/component-size"
 import Color from "color"
 import { partition } from "lodash"
@@ -25,9 +26,9 @@ import { Layout } from "../../Constants"
 import { useContextMenu } from "../../hooks/useContextMenu"
 import { useStores } from "../../hooks/useStores"
 import { useTheme } from "../../hooks/useTheme"
-import { ChordBlockValueDisplay } from "../AIAssisted/Arrangement/chordBlockValueDisplay"
-import { ChordDial } from "../AIAssisted/Arrangement/chordDial"
-import { SegBlockValueDisplay } from "../AIAssisted/Arrangement/segmentBlockValueDisplay"
+import { ChordBlockValueDisplay } from "../AIAssisted/Accompaniment/chordBlockValueDisplay"
+import { ChordDial } from "../AIAssisted/Accompaniment/chordDial"
+import { SegBlockValueDisplay } from "../AIAssisted/Accompaniment/segmentBlockValueDisplay"
 import { ConGenerate } from "../AIAssisted/Continuation/ConGen"
 import { ConResampleButton } from "../AIAssisted/Continuation/ConResampleButton"
 import { GLCanvas } from "../GLCanvas/GLCanvas"
@@ -265,7 +266,11 @@ export const ArrangeView: FC = observer(() => {
         mouseMove: (handler: (e: MouseEvent) => void) => void,
         mouseUp: (handler: (e: MouseEvent) => void) => void
       ) => {
+        if (startPos.x < 0){
+          startPos.x = 0
+        }
         arrangeStartSelection(rootStore)(startPos)
+
 
         if (!rootStore.services.player.isPlaying) {
           setPlayerPosition(rootStore)(startPos.x)
@@ -305,16 +310,19 @@ export const ArrangeView: FC = observer(() => {
           const delta = pointSub(createPoint(e), startPos).x
           
           if (rootStore.arrangeViewStore.selection_con != null && isSelectionSelected_con){
-            if (original_width + delta > rootStore.song.timebase*2){
+            let new_width = original_width + delta
+            new_width = Math.floor(new_width / rootStore.song.timebase + 0.5) * rootStore.song.timebase
+            if (new_width > rootStore.song.timebase*2){
               rootStore.assistStore.con.display_buttons = false
             }
-            rootStore.arrangeViewStore.selection_con.width = Math.max(original_width + delta, rootStore.song.timebase*2)
+            rootStore.arrangeViewStore.selection_con.width = Math.max(new_width, rootStore.song.timebase*2)
           }
         })
         mouseUp((e) => {if (isSelectionSelected_con){
           ConGenerate(rootStore)
           if (rootStore.arrangeViewStore.selection_con != null && isSelectionSelected_con){
             rootStore.arrangeViewStore.selection_con.width = rootStore.arrangeViewStore.selection_con.width + 1
+            rootStore.arrangeViewStore.selection_con.width = rootStore.arrangeViewStore.selection_con.width - 1
           }
         }})
       }
@@ -364,6 +372,7 @@ export const ArrangeView: FC = observer(() => {
             else{ 
               let new_x = rootStore.song.timebase*4*(Math.floor((delta+2*rootStore.song.timebase)/(rootStore.song.timebase*4))) + original_x_seg
               let width = rootStore.arrangeViewStore.segmentBlocks[segBlockIdx].width
+              if (new_x < 0){return}
               for (let i=0; i<rootStore.arrangeViewStore.segmentBlocks.length; i++){
                 if (i == segBlockIdx){
                   continue
@@ -425,12 +434,12 @@ export const ArrangeView: FC = observer(() => {
             else{ 
               let new_x = rootStore.song.timebase*(Math.floor((delta)/(rootStore.song.timebase))) + original_x_chd
               let width = rootStore.arrangeViewStore.chordBlocks[chdBlockIdx].width
+              if (new_x < 0){return}
               for (let i=0; i<rootStore.arrangeViewStore.chordBlocks.length; i++){
                 if (i == chdBlockIdx){
                   continue
                 }
                 let block = rootStore.arrangeViewStore.chordBlocks[i]
-                console.log(i,chdBlockIdx, new_x, new_x+width, block.x, block.x+block.width)
                 if ((new_x <= block.x && new_x+width > block.x) || (new_x >= block.x && new_x < block.x + block.width)){
                   return
                 }
@@ -556,7 +565,7 @@ export const ArrangeView: FC = observer(() => {
             }
           }
           let x = Math.floor((startPos.x) / (rootStore.song.timebase)) * rootStore.song.timebase
-          rootStore.arrangeViewStore.chordBlocks.push({x: x, y: 2, width:rootStore.song.timebase, height: 1, chd_string: "C", chd_mat: [],color: undefined})
+          rootStore.arrangeViewStore.chordBlocks.push({x: x, y: 2, width:rootStore.song.timebase, height: 1, chd_string: "Cmaj", chd_mat: [0, 3, [], 0],color: undefined})
           chdDraw_original_x = x
           handler = chdDraw
         }
