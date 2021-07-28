@@ -1,5 +1,3 @@
-![Node.js CI](https://github.com/ryohey/signal/workflows/Node.js%20CI/badge.svg)
-
 # Signal
 
 A friendly music sequencer application built with web technology.
