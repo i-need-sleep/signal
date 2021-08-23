@@ -13,6 +13,8 @@ import { ConConfirm, ConGenerate } from "./ConGen"
 import { ConTempSlider } from "./ConTempSlider"
 import { AccFilterSelect } from "../Accompaniment/AccFilterSelect"
 
+const axios = require('axios').default;
+
 const useStyles = makeStyles((theme) => ({
   toggleButtonGroup: {
     backgroundColor: "transparent",
@@ -43,6 +45,17 @@ export const ConButton = observer(() => {
   const { assistStore, arrangeViewStore, song } = useStores()
   const rootStore = useStores()
   const active = assistStore.active
+
+  // Load accomontage references
+  if (assistStore.acc.refs.length == 0){
+    axios.get('http://127.0.0.1:5000/arrangement_refs')
+      .then(function (response: any) {
+        assistStore.acc.refs = response.data.names
+      })
+      .catch(function (error: any) {
+        console.log(error)
+      })
+  }
 
 
   const onClickCon = useCallback(
@@ -90,8 +103,8 @@ export const ConButton = observer(() => {
       <StyledToggleButton 
           onClick={function(e) {
               if (assistStore.active != "continuation"){
+                
                 // Draw a 1-bar box for continuation
-
                 if (Object.values(arrangeViewStore.selectedEventIds).length != 1){
                   return
                 }
@@ -107,6 +120,7 @@ export const ConButton = observer(() => {
                 arrangeViewStore.selection_con = {x: box_start, y:box_y, width: song.timebase * 4, height: 1}
                 ConGenerate(rootStore)
                 onClickCon()
+                
               }
           }} 
           value="continuation">
@@ -133,6 +147,7 @@ export const ConButton = observer(() => {
           style: {
           overflow: 'hidden'},
         }}
+        onClick={(e)=>{e.stopPropagation()}}
       >
 
         <Typography className={classes.typography}>Temperature: 

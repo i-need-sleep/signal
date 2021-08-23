@@ -3,7 +3,10 @@ import Grid from '@material-ui/core/Grid';
 import * as d3 from "d3";
 import { FC, useEffect, useState } from "react";
 import { useStores } from "../../../hooks/useStores";
-
+import { IconButton } from '@material-ui/core';
+import VolumeUpIcon from '@material-ui/icons/VolumeUp';
+import { playChord } from '../playChord';
+import { makeMatFromChord } from '../makeMatFromChord';
 
 export const ChordDial: FC = () => {
   
@@ -47,8 +50,10 @@ export const ChordDial: FC = () => {
 
     // Tuned manually after resizing
     const outer_text_offset = 34;
+    const outer_text_offset_small = 28;
+
     const inner_text_offset_upper = 28;
-    const inner_text_offset_lower = 22;
+    const inner_text_offset_lower = 28;
     const center_text_offset = 1;
 
     const inner_rads = [0, 0.2, 0.4, 0.6, 0.8, 1, 1.2, 1.4, 1.6, 1.8, 2];
@@ -106,14 +111,16 @@ export const ChordDial: FC = () => {
       if (color == undefined){
         color = ""
       }
-      let arc: any = d3
-        .arc()
-        .innerRadius(dial_r_inner)
-        .outerRadius(dial_r_outer)
-        .startAngle(outer_rads[i] * Math.PI)
-        .endAngle(outer_rads[i + 1] * Math.PI);
+      
+      if (i < 3 || i > 7){
+        let arc: any = d3
+          .arc()
+          .innerRadius(dial_r_inner)
+          .outerRadius(dial_r_outer)
+          .startAngle(outer_rads[i] * Math.PI)
+          .endAngle(outer_rads[i + 1] * Math.PI);
 
-      g_outer
+          g_outer
         .append("path")
         .attr("d", arc)
         .attr("id", "outer_path" + i)
@@ -169,6 +176,79 @@ export const ChordDial: FC = () => {
           }
           d3.select("#outer_path" + i).style("opacity", opacity.normal);
         });
+      }
+      else{
+        let arc: any = d3
+          .arc()
+          .innerRadius(dial_r_inner)
+          .outerRadius(dial_r_outer)
+          .endAngle(outer_rads[i] * Math.PI)
+          .startAngle(outer_rads[i + 1] * Math.PI);
+
+          g_outer
+        .append("path")
+        .attr("d", arc)
+        .attr("id", "outer_path" + i)
+        .attr("class", "outer_path")
+        // Can be edited in CSS by referencing the class/id
+        .style("fill", color)
+        .style("stroke", "black")
+        .style("stroke-width", "2px")
+        .style("opacity", opacity.normal)
+        .on("click", function() {
+          outer_on_click(i)
+        })
+        .on("mouseover", function() {
+          if (d3.select("#outer_path" + i).classed("path_selected")) {
+            return;
+          }
+          d3.select("#outer_path" + i).style("opacity", opacity.hover);
+        })
+        .on("mouseout", function() {
+          if (d3.select("#outer_path" + i).classed("path_selected")) {
+            return;
+          }
+          d3.select("#outer_path" + i).style("opacity", opacity.normal);
+        });
+
+      let offset = outer_text_offset
+      if (i < 7){
+        offset = outer_text_offset_small
+      }
+      g_outer
+        .append("text")
+        .attr("dx", offset)
+        .attr("dy", -(1 + dial_r_outer) / 6)
+        .append("textPath")
+        .attr("xlink:href", "#outer_path" + i)
+        .style("text-anchor", "middle")
+        .style("dominant-baseline", "middle")
+        .style("fill", "black")
+        .style("stroke", "black")
+        .style("stroke-width", "0")
+        .style("font-size", outerFontSize)
+        .style("user-select", "none")
+        .attr("id", "outer_text" + i)
+        .text(outer_text[i])
+        .on("click", function() {
+          outer_on_click(i)
+          })
+        .on("mouseover", function() {
+          if (d3.select("#outer_path" + i).classed("path_selected")) {
+            return;
+          }
+          d3.select("#outer_path" + i).style("opacity", opacity.hover);
+        })
+        .on("mouseout", function() {
+          if (d3.select("#outer_path" + i).classed("path_selected")) {
+            return;
+          }
+          d3.select("#outer_path" + i).style("opacity", opacity.normal);
+        });
+      }
+      
+
+      
     }
 
     // Inner Ring
@@ -177,39 +257,40 @@ export const ChordDial: FC = () => {
       if (color === undefined){
         color = ''
       }
-      let arc :any = d3
-        .arc()
-        .innerRadius(dial_r_center)
-        .outerRadius(dial_r_inner)
-        .startAngle(inner_rads[i] * Math.PI)
-        .endAngle(inner_rads[i + 1] * Math.PI);
+      
 
-      g_inner
-        .append("path")
-        .attr("d", arc)
-        .attr("id", "inner_path" + i)
-        .attr("class", "inner_path")
-        .style("fill", color)
-        .style("opacity", opacity.normal)
-        .style("stroke", "black")
-        .style("stroke-width", "2px")
-        .on("click", function() {
-          inner_on_click(i)
-        })
-        .on("mouseover", function() {
-          if (d3.select("#inner_path" + i).classed("path_selected")) {
-            return;
-          }
-          d3.select("#inner_path" + i).style("opacity", opacity.hover);
-        })
-        .on("mouseout", function() {
-          if (d3.select("#inner_path" + i).classed("path_selected")) {
-            return;
-          }
-          d3.select("#inner_path" + i).style("opacity", opacity.normal);
-        });
+      if (i < 3 || i > 6) {
+          let arc :any = d3
+          .arc()
+          .innerRadius(dial_r_center)
+          .outerRadius(dial_r_inner)
+          .startAngle(inner_rads[i] * Math.PI)
+          .endAngle(inner_rads[i + 1] * Math.PI);
 
-      if (0 < i && i < 7) {
+        g_inner
+          .append("path")
+          .attr("d", arc)
+          .attr("id", "inner_path" + i)
+          .attr("class", "inner_path")
+          .style("fill", color)
+          .style("opacity", opacity.normal)
+          .style("stroke", "black")
+          .style("stroke-width", "2px")
+          .on("click", function() {
+            inner_on_click(i)
+          })
+          .on("mouseover", function() {
+            if (d3.select("#inner_path" + i).classed("path_selected")) {
+              return;
+            }
+            d3.select("#inner_path" + i).style("opacity", opacity.hover);
+          })
+          .on("mouseout", function() {
+            if (d3.select("#inner_path" + i).classed("path_selected")) {
+              return;
+            }
+            d3.select("#inner_path" + i).style("opacity", opacity.normal);
+          });
         g_inner
           .append("text")
           .attr("dx", inner_text_offset_lower)
@@ -241,10 +322,42 @@ export const ChordDial: FC = () => {
             d3.select("#inner_path" + i).style("opacity", opacity.normal);
           });
       } else {
+        let arc :any = d3
+        .arc()
+        .innerRadius(dial_r_center)
+        .outerRadius(dial_r_inner)
+        .endAngle(inner_rads[i] * Math.PI)
+        .startAngle(inner_rads[i + 1] * Math.PI);
+
+      g_inner
+        .append("path")
+        .attr("d", arc)
+        .attr("id", "inner_path" + i)
+        .attr("class", "inner_path")
+        .style("fill", color)
+        .style("opacity", opacity.normal)
+        .style("stroke", "black")
+        .style("stroke-width", "2px")
+        .on("click", function() {
+          inner_on_click(i)
+        })
+        .on("mouseover", function() {
+          if (d3.select("#inner_path" + i).classed("path_selected")) {
+            return;
+          }
+          d3.select("#inner_path" + i).style("opacity", opacity.hover);
+        })
+        .on("mouseout", function() {
+          if (d3.select("#inner_path" + i).classed("path_selected")) {
+            return;
+          }
+          d3.select("#inner_path" + i).style("opacity", opacity.normal);
+        });
+        
         g_inner
           .append("text")
-          .attr("dx", inner_text_offset_upper)
-          .attr("dy", (1 + dial_r_outer) / 5)
+          .attr("dx", inner_text_offset_lower)
+          .attr("dy", -(1 + dial_r_outer) / 6)
           .append("textPath")
           .attr("xlink:href", "#inner_path" + i)
           .style("text-anchor", "middle")
@@ -255,7 +368,6 @@ export const ChordDial: FC = () => {
           .style("font-size", innerFontSize)
           .style("letter-spacing", "0.1em")
           .style("user-select", "none")
-          .attr("id", "inner_text")
           .text(inner_text[i])
           .on("click", function() {
             inner_on_click(i)
@@ -407,11 +519,15 @@ let pitch = pitches[i]
 bass_choices.push(<MenuItem onClick={()=>{handleClose_bass(i)}}>{pitch}</MenuItem>)
 }
 
+const play_chord = () => {
+  playChord(makeMatFromChord([arrangeViewStore.chordBlocks[block_idx].chd_mat, 0, 0.125])[0])
+}
+
   return (
-    <div >
+    <div style={{paddingTop: "10px"}}>
         <Grid container spacing={3}>
-          <Grid item xs={9}>
-            <svg id="chord_dial" className="chord_dial" height="300px" width="300px"></svg>
+          <Grid item xs={8}>
+            <svg id="chord_dial" className="chord_dial" height="280px" width="300px"></svg>
           </Grid>
 
           <Grid item xs={3}>
@@ -440,7 +556,10 @@ bass_choices.push(<MenuItem onClick={()=>{handleClose_bass(i)}}>{pitch}</MenuIte
               onClose={handleClose_bass}
             >
               {bass_choices}
-            </Menu>
+            </Menu><br/><br/><br/>
+            <IconButton>
+              <VolumeUpIcon onClick={play_chord} />
+            </IconButton>
           </Grid>
       </Grid>
     </div>

@@ -67,6 +67,22 @@ export function AccompanimentTrack(channel: number, name = "Accompaniment") {
   return track
 }
 
+export function AccompanimentRefTrack(channel: number, name = "Accompaniment Ref") {
+  if (!Number.isInteger(channel)) {
+    throw new Error("channel is not integer")
+  }
+  const track = new Track()
+  track.channel = channel
+  const events = toTrackEvents([
+    ...resetTrackMIDIEvents(channel),
+    endOfTrackMidiEvent(1),
+    trackNameMidiEvent(2, name),
+  ])
+  track.addEvents(events)
+  track.special_track = "accompaniment_ref"
+  return track
+}
+
 export const resetTrackMIDIEvents = (channel: number) => [
   resetAllMidiEvent(0, channel),
   trackNameMidiEvent(0, ""),

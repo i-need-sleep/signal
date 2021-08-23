@@ -31,6 +31,8 @@ import { ChordDial } from "../AIAssisted/Accompaniment/chordDial"
 import { SegBlockValueDisplay } from "../AIAssisted/Accompaniment/segmentBlockValueDisplay"
 import { ConGenerate } from "../AIAssisted/Continuation/ConGen"
 import { ConResampleButton } from "../AIAssisted/Continuation/ConResampleButton"
+import { makeMatFromChord } from "../AIAssisted/makeMatFromChord"
+import { playChord } from "../AIAssisted/playChord"
 import { GLCanvas } from "../GLCanvas/GLCanvas"
 import { HorizontalScaleScrollBar } from "../inputs/ScaleScrollBar"
 import { BAR_WIDTH, VerticalScrollBar } from "../inputs/ScrollBar"
@@ -38,6 +40,12 @@ import CanvasPianoRuler from "../PianoRoll/CanvasPianoRuler"
 import { observeDrag } from "../PianoRoll/MouseHandler/observeDrag"
 import { ArrangeContextMenu } from "./ArrangeContextMenu"
 import { ArrangeViewRenderer } from "./ArrangeViewRenderer"
+import { Backdrop } from "@material-ui/core"
+import { CircularProgress } from "@material-ui/core"
+import { makeStyles, createStyles, Theme } from '@material-ui/core/styles';
+import { AccRefApplyButton } from "../AIAssisted/Accompaniment/AccRefApplyButton"
+import { accGenerate } from "../AIAssisted/Accompaniment/AccGen"
+import { relative } from "node:path"
 
 const Wrapper = styled.div`
   flex-grow: 1;
@@ -652,6 +660,17 @@ export const ArrangeView: FC = observer(() => {
       }
       last_time = time
 
+      // Shift click for chord playback
+      if (e.shiftKey){
+        for (let i=0; i<rootStore.arrangeViewStore.chordBlocks.length; i++){
+          let block = rootStore.arrangeViewStore.chordBlocks[i]
+          if (containsPoint(block, startPos)){
+            playChord(makeMatFromChord([block.chd_mat, 0, 0.125])[0])
+            return
+          }
+        }
+      }
+
       switch (e.button) {
         case 0:
           handleLeftClick(e, createPoint)
@@ -766,6 +785,17 @@ export const ArrangeView: FC = observer(() => {
 
   const [selectedChdIdx, setSelectedChdIdx] = useState<number>(0)
 
+  // Backdrop
+  const useStyles = makeStyles((theme: Theme) =>
+  createStyles({
+    backdrop: {
+      zIndex: theme.zIndex.drawer + 1,
+      color: '#fff',
+    },
+  }),
+);
+const classes = useStyles();
+
   return (
     <Wrapper>
       <HeaderList>
@@ -788,6 +818,17 @@ export const ArrangeView: FC = observer(() => {
               }}
             >
               {t.displayName}
+              <br hidden = {! (t.special_track == "accompaniment_ref")}/>
+              <button 
+              hidden = {! (t.special_track == "accompaniment_ref")}
+              style = {{
+                position: 'relative',
+                left: "-45px",
+                top: "23px"
+              }}
+              onClick={()=>{accGenerate(rootStore, [], '', true)}}>
+                Apply
+              </button>
             </TrackHeader>
           ))}
         </div>
@@ -906,9 +947,17 @@ export const ArrangeView: FC = observer(() => {
           vertical: 'top',
           horizontal: 'left',
         }}
+        PaperProps={{
+          style: {
+          overflow: 'hidden'},
+        }}
       >
         <ChordDial />
       </Popover>
+      
+      <Backdrop className={classes.backdrop} open={rootStore.assistStore.loading} onClick={()=>{rootStore.assistStore.loading=false}}>
+        <CircularProgress color="inherit" />
+      </Backdrop>
     </Wrapper>
   )
 })

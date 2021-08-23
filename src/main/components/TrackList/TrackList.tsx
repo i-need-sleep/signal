@@ -32,7 +32,7 @@ export const TrackList: FC = observer(() => {
     rootStore.trackMute.isSolo(i)
   )
   const tracks = rootStore.song.tracks
-    .filter((t) => (!t.isConductorTrack && (t.special_track == undefined || t.special_track == "accompaniment")))
+    .filter((t) => (!t.isConductorTrack && (t.special_track == undefined || t.special_track == "accompaniment" || t.special_track == "accompaniment_ref")))
     .map((t): TrackListItemData => {
       const index = rootStore.song.tracks.indexOf(t)
       const selected =

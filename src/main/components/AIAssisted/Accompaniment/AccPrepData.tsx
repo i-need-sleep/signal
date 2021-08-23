@@ -4,11 +4,15 @@ import { makeMatFromChord } from "../makeMatFromChord";
 
 
 
-export const accPrepData = (rootStore: RootStore, filter: any) => {
+export const accPrepData = (rootStore: RootStore, filter: any, spotlight: any, from_ref=false) => {
   const { assistStore, arrangeViewStore } = rootStore
   
   let noteSeq: any = {notes:[]}
   noteSeq = makeNoteSeq(rootStore) // {notes:[{quantizedStartStep, quantizedEndStep, pitch}]}
+  let ref_noteSeq:any = []
+  if (from_ref){
+    ref_noteSeq = makeNoteSeq(rootStore, false, rootStore.assistStore.acc.ref_idx)
+  }
   let chdBlocks = arrangeViewStore.chordBlocks 
   let segBlocks = arrangeViewStore.segmentBlocks
   
@@ -16,8 +20,8 @@ export const accPrepData = (rootStore: RootStore, filter: any) => {
   let chd_out: any[] = [] // [notes]
 
   // Final outputs
-  let note_mat: any[] =  [] // (T * 130) quantized at 16th note. 130 = 128 pitches + sustain + rest
-  let chd_mat: any[] =  [] // (T * 36) quantized at 16th note [root (absolute) chroma(absolute) bass(relative)] in one-hot
+  let note_mat: any[] = [] // (T * 130) quantized at 16th note. 130 = 128 pitches + sustain + rest
+  let chd_mat: any[] = [] // (T * 36) quantized at 16th note [root (absolute) chroma(absolute) bass(relative)] in one-hot
   let seg_out = '' // eg."A4B4A4\n"]
 
   if (arrangeViewStore.selection == null){return}
@@ -143,5 +147,5 @@ export const accPrepData = (rootStore: RootStore, filter: any) => {
     note_mat.push(zeros)
   }
 
-  return {melody: note_mat, chords: chd_mat, segments: seg_out, filter: filter}
+  return {melody: note_mat, chords: chd_mat, segments: seg_out, filter: filter, spotlight: spotlight, ref_noteSeq: ref_noteSeq}
 }

@@ -37,7 +37,7 @@ const _ConTempSlider: FC<any> = observer(() => {
     [rootStore]
   )
   return (
-    <Container>
+    <Container onClick={(e)=>{e.stopPropagation()}}>
       <LightSlider
         value={temp}
         onChange={(_, value) => onChange(value as number)}

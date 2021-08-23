@@ -9,6 +9,9 @@ export default class AssistStore {
   // The selected tool
   active: Active = "selection";
 
+  // Loading backdrop
+  loading: boolean = false
+
   // Continuation
   con={
     quantPerQuarter: 4,
@@ -28,7 +31,16 @@ export default class AssistStore {
   }
 
   // Accompaniment
-  acc = {posting: false}
+  acc = {
+    posting: false, 
+
+    // spotlight reference
+    refs: [], 
+    ref_chosen: '',
+    
+    // ref track
+    ref_idx: -1,
+  }
 
   constructor(rootStore: RootStore) {
     this.rootStore = rootStore
@@ -39,6 +51,7 @@ export default class AssistStore {
       blockstyle: observable,
       blockSelection: observable,
       acc: observable,
+      loading: observable,
     })
   }
 

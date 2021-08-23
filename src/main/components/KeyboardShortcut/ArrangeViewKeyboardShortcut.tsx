@@ -6,6 +6,7 @@ import {
   arrangeResetSelection,
 } from "../../actions"
 import { useStores } from "../../hooks/useStores"
+import { ConConfirm } from "../AIAssisted/Continuation/ConGen"
 
 const isFocusable = (e: EventTarget) =>
   e instanceof HTMLAnchorElement ||
@@ -46,6 +47,16 @@ export const ArrangeViewKeyboardShortcut: FC = () => {
           if (e.ctrlKey || e.metaKey) {
             rootStore.arrangeViewStore.scrollBy(0, -SCROLL_DELTA)
           }
+          break
+        }
+        case "Digit1": {
+          ConConfirm(rootStore)
+          rootStore.assistStore.active = "pencil"
+          break
+        }
+        case "Digit2": {
+          ConConfirm(rootStore)
+          rootStore.assistStore.active = "selection"
           break
         }
         default:

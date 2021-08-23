@@ -67,6 +67,14 @@ export const openSong = (rootStore: RootStore) => (input: HTMLInputElement) => {
 export const addTrack = (rootStore: RootStore) => () => {
   pushHistory(rootStore)
   rootStore.song.addTrack(emptyTrack(rootStore.song.tracks.length - 1))
+
+  const tracks = rootStore.song.tracks
+  rootStore.assistStore.acc.ref_idx = -1
+  for ( let i=0; i<tracks.length; i++){
+    if (tracks[i].special_track == "accompaniment_ref"){
+      rootStore.assistStore.acc.ref_idx = i
+    }
+  }
 }
 
 export const removeTrack = (rootStore: RootStore) => (trackId: number) => {
@@ -79,6 +87,15 @@ export const removeTrack = (rootStore: RootStore) => (trackId: number) => {
   }
   pushHistory(rootStore)
   rootStore.song.removeTrack(trackId)
+
+
+  const tracks = rootStore.song.tracks
+  rootStore.assistStore.acc.ref_idx = -1
+  for ( let i=0; i<tracks.length; i++){
+    if (tracks[i].special_track == "accompaniment_ref"){
+      rootStore.assistStore.acc.ref_idx = i
+    }
+  }
 }
 
 export const selectTrack = (rootStore: RootStore) => (trackId: number) => {

@@ -52,6 +52,7 @@ export const ConGenerate = (rootStore: RootStore) => {
   const selectedEventIdsObj = rootStore.arrangeViewStore.selectedEventIds
 
   if (rootStore.arrangeViewStore.selection_con == null || noteSeq == null){
+    rootStore.assistStore.loading = false
     return
   }
 
@@ -63,17 +64,24 @@ export const ConGenerate = (rootStore: RootStore) => {
 
   // Run the RNN
   let rnn_step = Math.floor(gen_ticks/timebase*quantPerQuarter)
-  if (rnn_step <= 0){return}
+  if (rnn_step <= 0){
+    rootStore.assistStore.loading = false
+    return
+  }
   music_rnn
   .continueSequence(noteSeq, rnn_step, rnn_temperatre)
-  .then((cont_out: any) => write_rnn_notes(cont_out.notes)
-  )
+  .then((cont_out: any) => {
+    rootStore.assistStore.loading = false
+    write_rnn_notes(cont_out.notes)
+  })
 
   // Write generated notes
   function write_rnn_notes (notes: any){
     for (let i=0; i < notes.length; i++){
       let pitch = notes[i].pitch
-      if (rootStore.arrangeViewStore.selection_con == null){return}
+      if (rootStore.arrangeViewStore.selection_con == null){
+        return
+      }
       let start = notes[i].quantizedStartStep/quantPerQuarter*timebase + gen_start_tick
       let duration = (notes[i].quantizedEndStep-notes[i].quantizedStartStep)/quantPerQuarter*timebase
       rootStore.song.selectedTrackId = Number(Object.keys(selectedEventIdsObj)[0])
@@ -82,7 +90,7 @@ export const ConGenerate = (rootStore: RootStore) => {
       rootStore.assistStore.temp_notes.push(new_id)
     }
   }
-  
+  return
 }
 
 function getNotesInSelection(tracks: Track[], selection: IRect) {
